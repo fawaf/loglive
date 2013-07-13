@@ -1,0 +1,2 @@
+graft loglive/static
+graft loglive/templates

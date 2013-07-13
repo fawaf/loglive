@@ -12,5 +12,6 @@ setup(
         "pyinotify>=0.9.4",
         "pyzmq>=13.1.0",
         "tornado>=0.1.2",
-    ]
+    ],
+    include_package_data=True
     )

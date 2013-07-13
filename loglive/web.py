@@ -1,7 +1,7 @@
 from loglive import config
 from loglive.logs import get_log_files_by_channel
 from tornado.web import RequestHandler, Application, HTTPError
-
+import os
 
 
 
@@ -30,8 +30,12 @@ class ChannelHandler(RequestHandler):
                 channel, network))
         self.write(network + " ~ " + channel)
 
-application = Application([
-    (r'/', NetworkListingHandler),
-    (r'/([^/]+)', ChannelListingHandler),
-    (r'/([^/]+)/([^/]+)/', ChannelHandler),
-])
+application = Application(
+    handlers=[
+        (r'/', NetworkListingHandler),
+        (r'/([^/]+)', ChannelListingHandler),
+        (r'/([^/]+)/([^/]+)/', ChannelHandler),
+    ],
+    template_path=os.path.join(os.path.dirname(__file__), "templates"),
+    static_path=os.path.join(os.path.dirname(__file__), "static")
+)
