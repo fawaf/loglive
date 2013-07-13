@@ -1,25 +1,8 @@
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from datetime import datetime as dt
+from loglive.logs import parse_log_filename, get_log_files
 import os
-from pprint import pprint
 import pyinotify
-import re
-
-
-LOG_PATH_REGEX = r'^(#?[^\.\_]+)_(\d{8}).log$'
-ChannelLogFile = namedtuple('ChannelLogFile', ['channel', 'date', 'filename', 'path'])
-
-
-def parse_log_filename(file_path):
-    filename = os.path.basename(file_path)
-    match = re.match(LOG_PATH_REGEX, filename)
-    if not match:
-        return None
-    (channel, date) = match.groups()
-    return ChannelLogFile(path=file_path,
-                          filename=filename,
-                          channel=channel,
-                          date=dt.strptime(date, '%Y%m%d'))
 
 
 class NetworkDirectoryEventHandler(pyinotify.ProcessEvent):
@@ -51,20 +34,6 @@ class NetworkDirectoryEventHandler(pyinotify.ProcessEvent):
 
         content = self.channel_fh[log_file.channel].read()
         self.callback(self.network, log_file.channel, content)
-
-
-def get_log_files(directory):
-    if not os.path.isdir(directory):
-        return
-
-    for filename in os.listdir(directory):
-        file_path = os.path.join(directory, filename)
-        if not os.path.isfile(file_path):
-            continue
-        log = parse_log_filename(file_path)
-        if not log:
-            continue
-        yield log
 
 
 class LogTailer(object):
