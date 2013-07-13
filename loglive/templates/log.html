@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ network }} - {{ log.date.strftime("%Y-%m-%d") }}
+{% end %}
+
+{% block content %}
+{{ open(log.path).read() }}
+{% end %}

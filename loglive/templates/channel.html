@@ -6,6 +6,14 @@
 
 {% block content %}
 <div class="well">
-Dummy data
+<ul>
+{% for log in reversed(logs) %}
+    <li>
+        <a href="{{ reverse_url('log', network, channel, log.date.strftime("%Y%m%d")) }}">
+            {{ log.date.strftime("%Y-%m-%d") }}
+        </a>
+    </li>
+{% end %}
+</ul>
 </div>
 {% end %}
