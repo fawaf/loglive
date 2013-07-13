@@ -11,6 +11,7 @@ import os
 import zmq
 from zmq.eventloop.zmqstream import ZMQStream
 
+
 class MainHandler(RequestHandler):
     def get(self):
         networks = config.NETWORK_DIRECTORIES.keys()
@@ -98,9 +99,9 @@ class LogHandler(RequestHandler):
                     enable_live_updates=enable_live_updates,
                     irc_format=irc_format)
 
+
 class LiveLogHandler(WebSocketHandler):
     def open(self, network, channel):
-        print "websocket opened for", network, channel
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
         self.socket.connect("tcp://127.0.0.1:{0}".format(config.ZEROMQ_PORT))
@@ -109,15 +110,14 @@ class LiveLogHandler(WebSocketHandler):
         self.zmq_stream.on_recv(self.on_zmq_msg_receive)
 
     def on_close(self):
-        print "websocket closed"
         self.zmq_stream.close()
         self.socket.close()
 
     def on_zmq_msg_receive(self, data):
         data = data[0]
-        print "received", data
         lines = data.split("\n")[1:]
         self.write_message("\n".join([irc_format(line) for line in lines]))
+
 
 application = Application(
     handlers=[
