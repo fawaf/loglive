@@ -7,10 +7,10 @@ import zmq
 
 def make_log_tailer_callback(socket):
     def callback(network, channel, content):
-        socket.send(json_encode({
-            "network": network,
-            "channel": channel,
-            "content": content}))
+        socket.send("{network}~{channel}\n{message}".format(
+            network=network,
+            channel=channel,
+            message=content))
     return callback
 
 

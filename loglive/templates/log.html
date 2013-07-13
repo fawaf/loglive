@@ -6,26 +6,41 @@
 
 {% block content %}
 <div class="row">
-<div class="span6">
-{% if previous_log %}
-<a href="{{ reverse_url('log', network, channel, previous_log.date.strftime('%Y%m%d')) }}" class="btn btn-primary">
-    Previous Log ({{ previous_log.date.strftime('%Y-%m-%d') }})
-</a>
-{% end %}
-</div>
+    <div class="span6">
+    {% if previous_log %}
+        <a href="{{ reverse_url('log', network, channel, previous_log.date.strftime('%Y%m%d')) }}" class="btn btn-primary">
+            Previous Log ({{ previous_log.date.strftime('%Y-%m-%d') }})
+        </a>
+    {% end %}
+    </div>
 
-<div class="span6" style="text-align: right;">
-{% if next_log %}
-<a href="{{ reverse_url('log', network, channel, next_log.date.strftime('%Y%m%d')) }}" class="btn btn-primary">
-    Next Log ({{ next_log.date.strftime('%Y-%m-%d') }})
-</a>
-{% end %}
-</div>
+    <div class="span6" style="text-align: right;">
+        {% if next_log %}
+            <a href="{{ reverse_url('log', network, channel, next_log.date.strftime('%Y%m%d')) }}" class="btn btn-primary">
+                Next Log ({{ next_log.date.strftime('%Y-%m-%d') }})
+            </a>
+        {% end %}
+    </div>
 </div>
 <br />
+
 {% autoescape None %}
-<pre>
+<pre id="irc-lines">
 {% for line in open(log.path).read().split("\n") %}{{ irc_format(line) }}
 {% end %}
 </pre>
+{% end %}
+
+{% block extra_javascript %}
+{% if enable_live_updates %}
+<script type="text/javascript">
+    $(document).ready(function(){
+            var ws = new WebSocket("ws://localhost:8888{{ reverse_url('live_log', network, channel) }}");
+            ws.onmessage = function(event){
+                $("#irc-lines").append(event.data);
+            };
+    });
+</script>
+{% end %}
+
 {% end %}

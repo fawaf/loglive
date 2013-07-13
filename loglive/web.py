@@ -1,10 +1,15 @@
+from zmq.eventloop import ioloop
+ioloop.install()
+
 from datetime import datetime as dt
 from loglive import config
 from loglive.formatters import irc_format
 from loglive.logs import get_log_files_by_channel
 from tornado.web import RequestHandler, Application, HTTPError, URLSpec
+from tornado.websocket import WebSocketHandler
 import os
-
+import zmq
+from zmq.eventloop.zmqstream import ZMQStream
 
 class MainHandler(RequestHandler):
     def get(self):
@@ -82,6 +87,7 @@ class LogHandler(RequestHandler):
             previous_log = reverse_sorted_logs[index_of_desired_log + 1]
         if index_of_desired_log > 0:
             next_log = reverse_sorted_logs[index_of_desired_log - 1]
+        enable_live_updates = index_of_desired_log == 0
         self.render("log.html",
                     networks=networks,
                     network=network,
@@ -89,7 +95,29 @@ class LogHandler(RequestHandler):
                     log=desired_log,
                     previous_log=previous_log,
                     next_log=next_log,
+                    enable_live_updates=enable_live_updates,
                     irc_format=irc_format)
+
+class LiveLogHandler(WebSocketHandler):
+    def open(self, network, channel):
+        print "websocket opened for", network, channel
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.SUB)
+        self.socket.connect("tcp://127.0.0.1:{0}".format(config.ZEROMQ_PORT))
+        self.socket.setsockopt(zmq.SUBSCRIBE, "{0}~{1}".format(network,channel))
+        self.zmq_stream = ZMQStream(self.socket)
+        self.zmq_stream.on_recv(self.on_zmq_msg_receive)
+
+    def on_close(self):
+        print "websocket closed"
+        self.zmq_stream.close()
+        self.socket.close()
+
+    def on_zmq_msg_receive(self, data):
+        data = data[0]
+        print "received", data
+        lines = data.split("\n")[1:]
+        self.write_message("\n".join([irc_format(line) for line in lines]))
 
 application = Application(
     handlers=[
@@ -97,6 +125,7 @@ application = Application(
         URLSpec(r'/([^/]+)', NetworkHandler, name="network"),
         URLSpec(r'/([^/]+)/([^/]+)/', ChannelHandler, name="channel"),
         URLSpec(r'/([^/]+)/([^/]+)/(\d{8})', LogHandler, name="log"),
+        URLSpec(r'/([^/]+)/([^/]+)/live', LiveLogHandler, name="live_log"),
     ],
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
     static_path=os.path.join(os.path.dirname(__file__), "static")

@@ -4,7 +4,6 @@ from loglive.logs import parse_log_filename, get_log_files
 import os
 import pyinotify
 
-
 class NetworkDirectoryEventHandler(pyinotify.ProcessEvent):
     def my_init(self, network, channel_files, callback):
         self.network = network
