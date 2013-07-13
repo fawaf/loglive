@@ -59,11 +59,18 @@ class LogHandler(RequestHandler):
         except ValueError, e:
             raise HTTPError(404, "{0} not a valid date string".format(
                 datestring))
+
+        index_of_desired_log = None
+        previous_log = None
         desired_log = None
-        for log in reversed(channel_logs):
+        next_log = None
+
+        reverse_sorted_logs = [x for x in reversed(channel_logs)]
+        for (i, log) in enumerate(reverse_sorted_logs):
             # search for the log file in reverse chronological order
             # since newer logs will probably be most desired
             if log.date == desired_date:
+                index_of_desired_log = i
                 desired_log = log
                 break
         if not desired_log:
@@ -71,11 +78,17 @@ class LogHandler(RequestHandler):
                 404,
                 "Log for {channel} on {network} on {date} not found".format(
                     channel=channel, network=network, date=desired_dare))
+        if (index_of_desired_log + 1) < len(reverse_sorted_logs):
+            previous_log = reverse_sorted_logs[index_of_desired_log + 1]
+        if index_of_desired_log > 0:
+            next_log = reverse_sorted_logs[index_of_desired_log - 1]
         self.render("log.html",
                     networks=networks,
                     network=network,
                     channel=channel,
                     log=desired_log,
+                    previous_log=previous_log,
+                    next_log=next_log,
                     irc_format=irc_format)
 
 application = Application(

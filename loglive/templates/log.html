@@ -5,6 +5,18 @@
 {% end %}
 
 {% block content %}
+{% if previous_log %}
+<a href="{{ reverse_url('log', network, channel, previous_log.date.strftime('%Y%m%d')) }}" class="btn btn-primary">
+    Previous Log ({{ previous_log.date.strftime('%Y-%m-%d') }})
+</a>
+{% end %}
+
+{% if next_log %}
+<a href="{{ reverse_url('log', network, channel, next_log.date.strftime('%Y%m%d')) }}" class="btn btn-primary">
+    Next Log ({{ next_log.date.strftime('%Y-%m-%d') }})
+</a>
+{% end %}
+
 {% autoescape None %}
 <pre>
 {% for line in open(log.path).read().split("\n") %}{{ irc_format(line) }}
