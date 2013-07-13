@@ -1,5 +1,6 @@
 from datetime import datetime as dt
 from loglive import config
+from loglive.formatters import irc_format
 from loglive.logs import get_log_files_by_channel
 from tornado.web import RequestHandler, Application, HTTPError, URLSpec
 import os
@@ -74,7 +75,8 @@ class LogHandler(RequestHandler):
                     networks=networks,
                     network=network,
                     channel=channel,
-                    log=desired_log)
+                    log=desired_log,
+                    irc_format=irc_format)
 
 application = Application(
     handlers=[

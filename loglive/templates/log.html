@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 
 {% block title %}
-{{ network }} - {{ log.date.strftime("%Y-%m-%d") }}
+{{ channel }} - {{ log.date.strftime("%Y-%m-%d") }}
 {% end %}
 
 {% block content %}
-{{ open(log.path).read() }}
+{% autoescape None %}
+<pre>
+{% for line in open(log.path).read().split("\n") %}{{ irc_format(line) }}
+{% end %}
+</pre>
 {% end %}
