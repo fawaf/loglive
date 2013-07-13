@@ -108,5 +108,5 @@ def irc_format(text):
         result = "%s%s" % (result, to_concat)
     if is_inside_span:
         result = "%s</span>" % result
-
+    result = '<span class="irc-line">{0}</span>'.format(result)
     return result

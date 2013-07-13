@@ -25,20 +25,30 @@
 <br />
 
 {% autoescape None %}
-<pre id="irc-lines">
-{% for line in open(log.path).read().split("\n") %}{{ irc_format(line) }}
+<div id="irc-lines">
+{% for line in open(log.path).read().strip().split("\n") %}{{ irc_format(line.strip()) }}
 {% end %}
-</pre>
+</div>
 {% end %}
 
 {% block extra_javascript %}
 {% if enable_live_updates %}
 <script type="text/javascript">
+    var user_is_near_bottom = false;
     $(document).ready(function(){
-            var ws = new WebSocket("ws://" + window.location.host  + "{{ reverse_url('live_log', network, channel) }}");
-            ws.onmessage = function(event){
-                $("#irc-lines").html($("#irc-lines").html() + event.data);
-            };
+        $(window).scroll(function(){
+            if($(window).scrollTop() + $(window).height() > $(document).height() - 100){
+                    user_is_near_bottom = true;
+            }
+        });
+
+        var ws = new WebSocket("ws://" + window.location.host  + "{{ reverse_url('live_log', network, channel) }}");
+        ws.onmessage = function(event){
+            $("#irc-lines").append(event.data);
+            if(user_is_near_bottom == true){
+                $("html, body").animate({ scrollTop: $(document).height() }, "fast");
+            }
+        };
     });
 </script>
 {% end %}
