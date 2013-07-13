@@ -5,3 +5,12 @@ NETWORK_DIRECTORIES = {
     "Rizon": "/home/kedo/.znc/users/rizon/moddata/log",
 }
 
+CHANNEL_BLACKLIST = [
+    'Global',
+    'HostServ',
+    'NickServ',
+    'nickserv',
+    'hopm-siglost',
+    'status',
+]
+

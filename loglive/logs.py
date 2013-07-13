@@ -1,5 +1,6 @@
 from collections import defaultdict, namedtuple
 from datetime import datetime as dt
+from loglive import config
 import os
 import re
 
@@ -14,6 +15,8 @@ def parse_log_filename(file_path):
     if not match:
         return None
     (channel, date) = match.groups()
+    if channel in config.CHANNEL_BLACKLIST:
+        return None
     return ChannelLogFile(path=file_path,
                           filename=filename,
                           channel=channel,
