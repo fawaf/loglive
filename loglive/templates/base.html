@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %}LogLive{% end %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+        <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="container">
+            <div class="navbar navbar-inverse">
+                <div class="navbar-inner">
+                    <a class="brand" href="{{ reverse_url('network_listing') }}">LogLive</a>
+                    <ul class="nav">
+                        {% for net in networks %}
+                            {% try %}
+                                {% if net == network %}
+                                    <li class="active">
+                                {% else %}
+                                    <li>
+                                {% end %}
+                            {% except %}
+                                <li>
+                            {% end %}
+                            <a href="{{ reverse_url('channel_listing', net) }}">
+                                {{ net }}
+                            </a>
+                        </li>
+                        {% end %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+        {% block content %}
+        {% end %}
+        </div>
+        <script src="/static/js/jquery.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+    </body>
+</html>
