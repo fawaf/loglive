@@ -54,6 +54,9 @@ class NetworkDirectoryEventHandler(pyinotify.ProcessEvent):
 
 
 def get_log_files(directory):
+    if not os.path.isdir(directory):
+        return
+
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
         if not os.path.isfile(file_path):
@@ -73,6 +76,9 @@ class LogTailer(object):
         mask = pyinotify.IN_CREATE | pyinotify.IN_MODIFY
 
         for (network, directory) in network_log_dirs.iteritems():
+            if not os.path.isdir(directory):
+                continue
+
             channel_files = defaultdict(lambda: list())
             log_files = sorted(get_log_files(directory),
                                key=lambda f: f.date)
@@ -88,5 +94,5 @@ class LogTailer(object):
 
         self.notifier = pyinotify.ThreadedNotifier(self.wm)
 
-    def start(self):
+    def loop(self):
         self.notifier.loop()
