@@ -35,9 +35,9 @@
 {% if enable_live_updates %}
 <script type="text/javascript">
     $(document).ready(function(){
-            var ws = new WebSocket("ws://localhost:8888{{ reverse_url('live_log', network, channel) }}");
+            var ws = new WebSocket("ws://" + window.location.host  + "{{ reverse_url('live_log', network, channel) }}");
             ws.onmessage = function(event){
-                $("#irc-lines").append(event.data);
+                $("#irc-lines").html($("#irc-lines").html() + event.data);
             };
     });
 </script>
