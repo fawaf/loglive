@@ -12,7 +12,7 @@ class NetworkListingHandler(RequestHandler):
 
 class ChannelListingHandler(RequestHandler):
     def get(self, network):
-        if network not in NETWORK_DIRECTORIES:
+        if network not in config.NETWORK_DIRECTORIES:
             self.send_error(404)
         self.write(network)
 
