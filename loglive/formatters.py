@@ -1,7 +1,6 @@
 import re
 from tornado.escape import xhtml_escape
 
-
 CTRL_COLOR = '\x03'      # ^C = color
 CTRL_RESET = '\x0F'      # ^O = reset
 CTRL_UNDERLINE = '\x1F'  # ^_ = underline
@@ -17,7 +16,10 @@ CTRL_REGEX = re.compile(r'(?:[%s%s%s])|(%s(?:\d{1,2}),?(?:\d{1,2})?)' % (
 def ctrl_to_colors(text):
     # the first character is CTRL_COLOR
     colors = text[1:].split(',')
-    fg_color_id = int(colors[0])
+    if colors[0].isdigit():
+        fg_color_id = int(colors[0])
+    else:
+        fg_color_id = None
     if len(colors) == 1:
         bg_color_id = None
     else:
@@ -64,7 +66,6 @@ def generate_span(state):
 
 def irc_format(text):
     text = xhtml_escape(text)
-
     result = ''
 
     # split text into fragments that are either plain text
