@@ -111,29 +111,31 @@ class LogHandler(RequestHandler, NetworksListMixin):
             raise HTTPError(404, "{0} not a valid date string".format(
                 datestring))
 
+        num_logs = len(channel_logs)
         index_of_desired_log = None
         previous_log = None
         desired_log = None
         next_log = None
 
-        reverse_sorted_logs = [x for x in reversed(channel_logs)]
+        reverse_sorted_logs = reversed(channel_logs)
         for (i, log) in enumerate(reverse_sorted_logs):
             # search for the log file in reverse chronological order
             # since newer logs will probably be most desired
             if log.date == desired_date:
-                index_of_desired_log = i
+                index_of_desired_log = num_logs - (i + 1)
                 desired_log = log
                 break
         if not desired_log:
             raise HTTPError(
                 404,
                 "Log for {channel} on {network} on {date} not found".format(
-                    channel=channel, network=network, date=desired_dare))
-        if (index_of_desired_log + 1) < len(reverse_sorted_logs):
-            previous_log = reverse_sorted_logs[index_of_desired_log + 1]
+                    channel=channel, network=network, date=desired_date))
+
+        if (index_of_desired_log + 1) < num_logs:
+            next_log = channel_logs[index_of_desired_log + 1]
         if index_of_desired_log > 0:
-            next_log = reverse_sorted_logs[index_of_desired_log - 1]
-        enable_live_updates = index_of_desired_log == 0
+            previous_log = channel_logs[index_of_desired_log - 1]
+        enable_live_updates = index_of_desired_log == num_logs
         self.render_with_networks(
             "log.html",
             network=network,
