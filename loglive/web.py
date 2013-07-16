@@ -135,7 +135,7 @@ class LogHandler(RequestHandler, NetworksListMixin):
             next_log = channel_logs[index_of_desired_log + 1]
         if index_of_desired_log > 0:
             previous_log = channel_logs[index_of_desired_log - 1]
-        enable_live_updates = index_of_desired_log == num_logs
+        enable_live_updates = (index_of_desired_log + 1) == num_logs
         self.render_with_networks(
             "log.html",
             network=network,
