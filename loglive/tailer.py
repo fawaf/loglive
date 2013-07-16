@@ -36,7 +36,7 @@ class NetworkDirectoryEventHandler(pyinotify.ProcessEvent):
 
 
 class LogTailer(object):
-    def __init__(self, network_log_dirs, callback):
+    def __init__(self, network_log_dirs, ioloop, callback):
         self.notifier = None
         self.wm = pyinotify.WatchManager()
         self.callback = callback
@@ -60,7 +60,4 @@ class LogTailer(object):
                          mask,
                          proc_fun=proc_fun)
 
-        self.notifier = pyinotify.ThreadedNotifier(self.wm)
-
-    def loop(self):
-        self.notifier.loop()
+        self.notifier = pyinotify.TornadoAsyncNotifier(self.wm, ioloop)
