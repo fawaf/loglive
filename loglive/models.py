@@ -38,17 +38,48 @@ class IrcNetwork(object):
 
     def get_channels(self):
         """
-        Returns a list of IrcChannel objects for this network
+        Generator of IrcChannel objects for this network, one object per
+        channel
         """
-        channel_names = set()
-        channels = list()
+        seen_channel_names = set()
         for path in self.get_log_filepaths():
             log_meta = parse_log_filename(path)
             if log_meta.channel in channel_names:
                 continue
-            channel_names.add(log_meta.channel)
-            channels.append(IrcChannel(self, log_meta.channel))
-        return channels
+            seen_channel_names.add(log_meta.channel)
+            yield IrcChannel(self, log_meta.channel)
+
+    @classmethod
+    def all(cls):
+        """
+        Generator of all IrcNetwork objects, based on NETWORK_DIRECTORIES
+        """
+        for (name, directory) in config.NETWORK_DIRECTORIES.iteritems():
+            network = cls(name, directory)
+            if not network:
+                # the directory didn't exist, or there was some other error
+                continue
+            yield network
+
+    @classmethod
+    def get(cls, network_name):
+        """
+        Returns an IrcNetwork for the given network name if it's a key in
+        NETWORK_DIRECTORIES, else returns None
+        """
+        if network_name not in config.NETWORK_DIRECTORIES:
+            return None
+        return cls(network_name, config.NETWORK_DIRECTORIES[network_name])
+
+    def get_channel(self, channel_name):
+        """
+        Returns an IrcChannel object for the given channel_name if it exists,
+        else None
+        """
+        for channel in self.get_channels():
+            if channel.name == channel_name:
+                return channel
+        return None
 
 
 class IrcChannel(object):
@@ -71,7 +102,7 @@ class IrcChannel(object):
     def get_logs(self):
         """
         Returns a sorted list of IrcLog objects,
-        sorted by increasing date (oldest first)
+        sorted by decreasing date (newest first)
         """
         logs = list()
         for path in self.network.get_log_filepaths():
@@ -81,7 +112,27 @@ class IrcChannel(object):
             logs.append(IrcLog(self,
                                log_meta.date,
                                path))
-        return sorted(logs, key=lambda log: log.date)
+        return sorted(logs, key=lambda log: log.date, reverse=True)
+
+    def get_log(self, date):
+        """
+        Returns the IrcLog object of the log file with the specified date,
+        else None
+        """
+        for log in self.get_logs():
+            if log.date == date:
+                return log
+        return None
+
+    def get_latest_log(self):
+        """
+        Returns the IrcLog object of the latest (newest) log file, else None
+        """
+        logs_iter = self.get_logs()
+        try:
+            return logs_iter.next()
+        except StopIteration:
+            return None
 
 
 class IrcLog(object):

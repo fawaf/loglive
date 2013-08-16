@@ -6,8 +6,9 @@ import functools
 from loglive import config
 from loglive.formatters import irc_format
 from loglive.logs import get_log_files_by_channel
-from tornado.options import define, options
-from tornado.web import RequestHandler, Application, HTTPError, URLSpec
+from tornado.auth import GoogleMixin
+from tornado.gen import coroutine
+from tornado.web import asynchronous, RequestHandler, Application, HTTPError, URLSpec
 from tornado.websocket import WebSocketHandler
 import os
 import zmq
@@ -73,7 +74,14 @@ class NetworksListMixin(object):
         return self.render(template, **kwargs)
 
 
-class MainHandler(RequestHandler, NetworksListMixin):
+class UserMixin(object):
+    def render(self, template, **kwargs):
+        kwargs['panda'] = super(UserMixin, self).get_secure_cookie('email')
+        return super(UserMixin, self).render(template, **kwargs)
+
+
+
+class MainHandler(RequestHandler, NetworksListMixin, UserMixin):
     def get(self):
         self.render_with_networks("networks_list.html")
 
@@ -145,35 +153,3 @@ class LogHandler(RequestHandler, NetworksListMixin):
             next_log=next_log,
             enable_live_updates=enable_live_updates,
             irc_format=irc_format)
-
-
-class LiveLogHandler(WebSocketHandler):
-    def open(self, network, channel):
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.SUB)
-        self.socket.connect("tcp://127.0.0.1:{0}".format(config.ZEROMQ_PORT))
-        self.socket.setsockopt(zmq.SUBSCRIBE, "{0}~{1}".format(network,channel))
-        self.zmq_stream = ZMQStream(self.socket)
-        self.zmq_stream.on_recv(self.on_zmq_msg_receive)
-
-    def on_close(self):
-        self.zmq_stream.close()
-        self.socket.close()
-
-    def on_zmq_msg_receive(self, data):
-        data = data[0]
-        lines = data.split("\n")[1:]
-        self.write_message("\n".join([irc_format(line) for line in lines]))
-
-
-application = Application(
-    handlers=[
-        URLSpec(r'/', MainHandler, name="network_listing"),
-        URLSpec(r'/(?P<network>[^/]+)/?', NetworkHandler, name="network"),
-        URLSpec(r'/(?P<network>[^/]+)/(?P<channel>[^/]+)/', ChannelHandler, name="channel"),
-        URLSpec(r'/(?P<network>[^/]+)/(?P<channel>[^/]+)/(?P<date_string>\d{8})', LogHandler, name="log"),
-        URLSpec(r'/(?P<network>[^/]+)/(?P<channel>[^/]+)/live', LiveLogHandler, name="live_log"),
-    ],
-    template_path=os.path.join(os.path.dirname(__file__), "templates"),
-    static_path=os.path.join(os.path.dirname(__file__), "static")
-)
