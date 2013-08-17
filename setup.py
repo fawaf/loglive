@@ -7,7 +7,7 @@ setup(
     author="Kenny Do",
     author_email="kedo@ocf.berkeley.edu",
     license="MIT License",
-    packages=["loglive"],
+    packages=["loglive", "loglive.handlers"],
     install_requires=[
         "pyinotify>=0.9.4",
         "pyzmq>=13.1.0",

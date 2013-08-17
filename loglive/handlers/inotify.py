@@ -1,3 +1,4 @@
+import os
 import pyinotify
 from collections import namedtuple
 

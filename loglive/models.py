@@ -1,4 +1,5 @@
 import os
+from loglive import config
 from loglive.lib import parse_log_filename
 
 
@@ -44,7 +45,7 @@ class IrcNetwork(object):
         seen_channel_names = set()
         for path in self.get_log_filepaths():
             log_meta = parse_log_filename(path)
-            if log_meta.channel in channel_names:
+            if log_meta.channel in seen_channel_names:
                 continue
             seen_channel_names.add(log_meta.channel)
             yield IrcChannel(self, log_meta.channel)
@@ -128,11 +129,10 @@ class IrcChannel(object):
         """
         Returns the IrcLog object of the latest (newest) log file, else None
         """
-        logs_iter = self.get_logs()
-        try:
-            return logs_iter.next()
-        except StopIteration:
-            return None
+        logs = self.get_logs()
+        if len(logs):
+            return logs[0]
+        return None
 
 
 class IrcLog(object):

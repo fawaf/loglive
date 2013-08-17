@@ -1,4 +1,8 @@
-from loglive.handlers import auth
+import os
+import pyinotify
+from loglive import config
+from loglive.handlers import auth, front
+from loglive.handlers.inotify import NetworkDirectoryInotifyHandler
 from loglive.models import IrcNetwork
 from tornado.web import Application
 
@@ -12,11 +16,11 @@ class LogLiveApplication(Application):
             'login_url': '/login',
         }
         handlers = list()
-        for handler_module in [auth]:
+        for handler_module in [auth, front]:
             handlers.extend(handler_module.handlers)
-        kwargs[handlers] = handlers
+        kwargs['handlers'] = handlers
 
-        super(LogLiveApplication, self).__init__(self, **kwargs)
+        super(LogLiveApplication, self).__init__(**kwargs)
 
 
 class LogTailer(object):
@@ -27,7 +31,7 @@ class LogTailer(object):
         mask = pyinotify.IN_CREATE | pyinotify.IN_MODIFY
 
         for network in IrcNetwork.all():
-            proc_fun = NetworkDirectoryEventHandler(
+            proc_fun = NetworkDirectoryInotifyHandler(
                 network=network,
                 callback=self.callback)
             self.wm.add_watch(network.directory,
@@ -36,7 +40,7 @@ class LogTailer(object):
 
         self.notifier = pyinotify.TornadoAsyncNotifier(self.wm, ioloop)
 
-    def make_callback(socket):
+    def make_callback(self, socket):
         def callback(network, channel, content):
             socket.send("{network}~{channel}\n{message}".format(
                 network=network,
