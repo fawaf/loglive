@@ -13,7 +13,8 @@ class IrcNetwork(object):
         then returns None
         """
         if not os.path.isdir(directory):
-            return None
+            raise ValueError("Directory {0} isn't a valid log directory".\
+                             format(directory))
 
         self.name = name
         self.directory = directory
@@ -56,8 +57,9 @@ class IrcNetwork(object):
         Generator of all IrcNetwork objects, based on NETWORK_DIRECTORIES
         """
         for (name, directory) in config.NETWORK_DIRECTORIES.iteritems():
-            network = cls(name, directory)
-            if not network:
+            try:
+                network = cls(name, directory)
+            except ValueError:
                 # the directory didn't exist, or there was some other error
                 continue
             yield network
