@@ -5,6 +5,7 @@ COOKIE_SECRET = "erg3345iehusdrSE*&E#%)&*EW2w98$(*@"
 
 NETWORK_DIRECTORIES = {
     "Rizon": "/home/kedo/.znc/users/rizon/moddata/log",
+    "OCF": "/home/kedo/.znc/users/ocf/moddata/log",
 }
 
 # access control list where the first line that matches is used.
