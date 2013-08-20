@@ -2,5 +2,7 @@
 
 <h1>{{network.name}}</h1>
 <ul>
-    <li ng-repeat="channel in network.channels">{{channel.name}}</li>
+    <li ng-repeat="channel in network.channels">
+        <a href="#/networks/{{network.name | encodeUriComponent}}/{{channel.name | encodeUriComponent}}">{{channel.name}}</a>
+    </li>
 </ul>

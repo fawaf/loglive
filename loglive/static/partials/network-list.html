@@ -1,7 +1,9 @@
 <ng-include src="'/static/partials/navbar.html'"></ng-include>
 
+<h1>Available Networks</h1>
+
 <ul>
     <li ng-repeat="network in networks">
-    {{network.name}}
+        <a href="#/networks/{{network.name | encodeUriComponent}}">{{network.name}}</a>
     </li>
 </ul>
