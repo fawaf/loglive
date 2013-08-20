@@ -1,7 +1,7 @@
 import os
 import pyinotify
 from loglive import config
-from loglive.handlers import auth, front
+from loglive.handlers import auth, front, api
 from loglive.handlers.inotify import NetworkDirectoryInotifyHandler
 from loglive.models import IrcNetwork
 from tornado.web import Application
@@ -16,7 +16,7 @@ class LogLiveApplication(Application):
             'login_url': '/login',
         }
         handlers = list()
-        for handler_module in [auth, front]:
+        for handler_module in [auth, front, api]:
             handlers.extend(handler_module.handlers)
         kwargs['handlers'] = handlers
 
