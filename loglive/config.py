@@ -8,21 +8,25 @@ NETWORK_DIRECTORIES = {
     "OCF": "/home/kedo/.znc/users/ocf/moddata/log",
 }
 
-# access control list where the first line that matches is used.
-# format is a list of tuples in the form:
+# Access control list where the first line that matches is used.
+# Format is a list of tuples in the form:
 #     ("ALLOW" or "DENY", "user email addr", "server", "channel")
 
-# "user email addr", "server", and "channel" can be wildcard "*".
-# Also, it is wise to have default DENY
+# "user email addr" and "server"  can be wildcard "*".
+# However, "channel" is a regex, so its wildcard is r'.*'.
+# The "channel" regex is matched using re.search, so it scans the channel
+# looking for a match.
+# It is wise to have default DENY
 ACCESS_RULES = [
-    ("DENY", "*", "*", "Global"),
-    ("DENY", "*", "*", "HostServ"),
-    ("DENY", "*", "*", "NickServ"),
-    ("DENY", "*", "*", "nickserv"),
-    ("DENY", "*", "*", "hopm-siglost"),
-    ("DENY", "*", "*", "status"),
+    ("DENY", "*", "*", r'^Global$'),
+    ("DENY", "*", "*", r'^[Hh]ost[Ss]erv$'),
+    ("DENY", "*", "*", r'^[Nn]ick[Ss]erv$'),
+    ("DENY", "*", "*", r'^hopm-siglost$'),
+    ("DENY", "*", "*", r'^status$'),
 
-    ("ALLOW", "*", "Rizon", "#CAA"),
+    ("ALLOW", "*", "Rizon", r'^#CAA$'),
 
-    ("DENY", "*", "*", "*"),
+    ("ALLOW", "*", "OCF", r'^#ocf$'),
+
+    ("DENY", "*", "*", r'.*'),
 ]

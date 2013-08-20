@@ -4,6 +4,7 @@ import os
 from collections import namedtuple
 from datetime import datetime as dt
 from tornado.web import HTTPError
+from loglive import config
 
 LOG_FILENAME_REGEX = r'^(#?[^\.\_]+)_(\d{8}).log$'
 LogFileMeta = namedtuple('LogFileMeta', ['channel', 'date'])
@@ -22,32 +23,22 @@ def rule_wildcard_applies(rule_str, user_str):
     return False
 
 
-def require_permission(handler_method):
-    """
-    Decorator for the method functions inside RequestHandler classes for
-    viewing networks and channels that raises 403 Forbidden if the user
-    doesn't have permission granted by config.ACCESS_RULES
-    """
-    @functools.wraps(handler_method)
-    def wrapped(request_handler, **kwargs):
-        user = request_handler.get_secure_cookie('email')
-        if not user:
-            user = '*'
-        network = kwargs.get('network', '*')
-        channel = kwargs.get('channel', '*')
+def __get_first_matching_rule(user, network, channel):
+    for rule in config.ACCESS_RULES:
+        # first, we check if the rule applies to this situation
+        (rule_action, rule_user, rule_network, rule_channel) = rule
+        if ((not rule_wildcard_applies(rule_user, user) or
+             not rule_wildcard_applies(rule_network, network))):
+            continue
+        if not re.search(rule_channel, channel):
+            continue
+        return rule
 
-        for rule in config.ACCESS_RULES:
-            # first, we check if the rule applies to this situation
-            (rule_action, rule_email, rule_network, rule_channel) = rule
-            if not all((rule_wildcard_applies(rule_email, user),
-                        rule_wildcard_applies(rule_network, network),
-                        rule_wildcard_applies(rule_channel, channel))):
-                continue
 
-            if rule_action.upper() != "ALLOW":
-                raise HTTPError(403)
-            else:
-                return handler_method(request_handler, **kwargs)
+def user_can_access_channel(user, network, channel):
+    rule = __get_first_matching_rule(user, network, channel)
+    action = rule[0]
+    return action.upper() == "ALLOW"
 
 
 def memoize(f):
