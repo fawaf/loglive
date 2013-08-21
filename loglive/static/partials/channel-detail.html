@@ -1,7 +1,6 @@
 <ng-include src="'/static/partials/navbar.html'"></ng-include>
 
 <h1>{{network.name}} / {{channel.name}}</h1>
-<!--   <a href="#/networks/{{network.name | encodeUriComponent}}/{{channel.name | encodeUriComponent}}">{{log}}</a> -->
 <div class="panel panel-default" ng-repeat="(year, month_logs) in logs">
     <div class="panel-heading">{{year}} Logs</div>
     <div class="panel-body">

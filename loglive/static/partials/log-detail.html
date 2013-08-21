@@ -1,0 +1,7 @@
+<ng-include src="'/static/partials/navbar.html'"></ng-include>
+
+<h1>{{network.name}} / {{channel.name}} / {{log.date}}</h1>
+
+<span ng-repeat="line in log.lines">
+    {{line}}<br />
+</span>

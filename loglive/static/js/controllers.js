@@ -9,7 +9,7 @@ function NetworkDetailCtrl($scope, $routeParams, Network){
     $scope.network = Network.get({networkName: $routeParams.networkName});
 }
 
-function ChannelDetailCtrl($scope, $routeParams, Network, Channel, $anchorScroll, $location){
+function ChannelDetailCtrl($scope, $routeParams, Network, Channel){
     $scope.networks = Network.query();
     $scope.network = Network.get({networkName: $routeParams.networkName});
     $scope.channel = Channel.get({networkName: $routeParams.networkName,
@@ -35,4 +35,14 @@ function ChannelDetailCtrl($scope, $routeParams, Network, Channel, $anchorScroll
             $scope.latestLog = log;
         }
     });
+}
+
+function LogDetailCtrl($scope, $routeParams, Network, Channel, Log){
+    $scope.networks = Network.query();
+    $scope.network = Network.get({networkName: $routeParams.networkName});
+    $scope.channel = Channel.get({networkName: $routeParams.networkName,
+                                  channelName: $routeParams.channelName});
+    $scope.log = Log.get({networkName: $routeParams.networkName,
+                          channelName: $routeParams.channelName,
+                          dateString: $routeParams.dateString});
 }
