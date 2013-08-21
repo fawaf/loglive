@@ -68,10 +68,8 @@ class IrcNetwork(object):
     def get(cls, network_name):
         """
         Returns an IrcNetwork for the given network name if it's a key in
-        NETWORK_DIRECTORIES, else returns None
+        NETWORK_DIRECTORIES, else raises ValueError
         """
-        if network_name not in config.NETWORK_DIRECTORIES:
-            return None
         return cls(network_name, config.NETWORK_DIRECTORIES[network_name])
 
     def get_channel(self, channel_name):

@@ -7,11 +7,12 @@ function NetworkListCtrl($scope, Network){
 function NetworkDetailCtrl($scope, $routeParams, Network){
     $scope.networks = Network.query();
     $scope.network = Network.get({networkName: $routeParams.networkName});
+    $scope.nav_network = $routeParams.networkName;
 }
 
 function ChannelDetailCtrl($scope, $routeParams, Network, Channel){
     $scope.networks = Network.query();
-    $scope.network = Network.get({networkName: $routeParams.networkName});
+    $scope.nav_network = $routeParams.networkName;
     $scope.channel = Channel.get({networkName: $routeParams.networkName,
                                   channelName: $routeParams.channelName}, function(channel){
         $scope.logs = {};
@@ -39,9 +40,7 @@ function ChannelDetailCtrl($scope, $routeParams, Network, Channel){
 
 function LogDetailCtrl($scope, $routeParams, Network, Channel, Log){
     $scope.networks = Network.query();
-    $scope.network = Network.get({networkName: $routeParams.networkName});
-    $scope.channel = Channel.get({networkName: $routeParams.networkName,
-                                  channelName: $routeParams.channelName});
+    $scope.nav_network = $routeParams.networkName;
     $scope.log = Log.get({networkName: $routeParams.networkName,
                           channelName: $routeParams.channelName,
                           dateString: $routeParams.dateString});

@@ -3,7 +3,7 @@
         <a class="navbar-brand" href="#/networks">LogLive</a>
     </div>
     <ul class="nav navbar-nav">
-        <li ng-repeat="n in networks" ng-class="{active : network.name == n.name}">
+        <li ng-repeat="n in networks" ng-class="{active : nav_network == n.name}">
            <a href="#/networks/{{n.name | encodeUriComponent}}/">{{n.name}}</a>
         </li>
     </ul>

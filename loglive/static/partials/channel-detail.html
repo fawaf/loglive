@@ -16,7 +16,7 @@
                 <td>
                     <ul class="pagination day-pagination">
                         <li ng-repeat="log in logs" ng-class="{ active : log == latestLog }" scroll-to-if="log == latestLog">
-                        <a href="#/networks/{{network.name | encodeUriComponent}}/{{channel.name | encodeUriComponent}}/{{log.raw}}">{{log.day}}</a>
+                        <a href="#/networks/{{channel.network | encodeUriComponent}}/{{channel.name | encodeUriComponent}}/{{log.raw}}">{{log.day}}</a>
                         </li>
                     </ul>
                 </td>
