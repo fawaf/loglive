@@ -11,4 +11,8 @@ factory('Network', function($resource){
             }
         }
     });
+}).
+factory('Channel', function($resource){
+    return $resource('/api/networks/:networkName/:channelName.json', {channelName: '@id'}, {
+    });
 });

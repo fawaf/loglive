@@ -1,0 +1,27 @@
+<ng-include src="'/static/partials/navbar.html'"></ng-include>
+
+<h1>{{network.name}} / {{channel.name}}</h1>
+<!--   <a href="#/networks/{{network.name | encodeUriComponent}}/{{channel.name | encodeUriComponent}}">{{log}}</a> -->
+<div class="panel panel-default" ng-repeat="(year, month_logs) in logs">
+    <div class="panel-heading">{{year}} Logs</div>
+    <div class="panel-body">
+        <table class="table table-bordered table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Days</th>
+                </tr>
+            </thead>
+            <tr ng-repeat="(month, logs) in month_logs">
+                <td>{{month | monthNumberToText}}</td>
+                <td>
+                    <ul class="pagination day-pagination">
+                        <li ng-repeat="log in logs" ng-class="{ active : log == latestLog }">
+                        <a href="#/networks/{{network.name | encodeUriComponent}}/{{channel.name | encodeUriComponent}}/{{log.raw}}">{{log.day}}</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
