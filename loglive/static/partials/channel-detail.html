@@ -16,7 +16,7 @@
                 <td>{{month | monthNumberToText}}</td>
                 <td>
                     <ul class="pagination day-pagination">
-                        <li ng-repeat="log in logs" ng-class="{ active : log == latestLog }">
+                        <li ng-repeat="log in logs" ng-class="{ active : log == latestLog }" scroll-to-if="log == latestLog">
                         <a href="#/networks/{{network.name | encodeUriComponent}}/{{channel.name | encodeUriComponent}}/{{log.raw}}">{{log.day}}</a>
                         </li>
                     </ul>
