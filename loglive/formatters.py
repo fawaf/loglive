@@ -1,4 +1,5 @@
 import re
+from collections import namedtuple
 from tornado.escape import xhtml_escape
 
 CTRL_COLOR = '\x03'      # ^C = color
@@ -11,7 +12,13 @@ CTRL_REGEX = re.compile(r'(?:[%s%s%s])|(%s(?:\d{1,2}),?(?:\d{1,2})?)' % (
     CTRL_UNDERLINE,
     CTRL_BOLD,
     CTRL_COLOR))
+JOIN_REGEX = re.compile(r'\*\*\* Joins: .*$')
+PART_REGEX = re.compile(r'\*\*\* Parts: .*$')
+QUIT_REGEX = re.compile(r'\*\*\* Quits: .*$')
 
+FrozenLineState = namedtuple('FrozenLineState', ['fg_color', 'bg_color', 'bold', 'underline', 'special'])
+LineFragment = namedtuple('LineFragment', ['state', 'text'])
+IrcLine = namedtuple('IrcLine', ['timestamp', 'nick', 'fragments'])
 
 def ctrl_to_colors(text):
     # the first character is CTRL_COLOR
@@ -37,6 +44,9 @@ class LineState:
         self.bold = False
         self.underline = False
 
+        # special is a string in ["join", "part", "nick"]
+        self.special = None
+
     def toggle_bold(self):
         self.bold = not self.bold
 
@@ -48,39 +58,75 @@ class LineState:
         if bg_color_id is not None:
             self.bg_color = bg_color_id
 
-
-def generate_span(state):
-    classes = []
-    if state.bold:
-        classes.append('irc-bold')
-    if state.underline:
-        classes.append('irc-underline')
-
-    # we don't display colors higher than 15
-    if state.fg_color is not None and state.fg_color < 16:
-        classes.append("irc-fg-%s" % state.fg_color)
-    if state.bg_color is not None and state.fg_color < 16:
-        classes.append("irc-bg-%s" % state.bg_color)
-    return "<span class=\"%s\">" % ' '.join(classes)
+    def freeze(self):
+        return FrozenLineState(fg_color=self.fg_color,
+                               bg_color=self.bg_color,
+                               bold=self.bold,
+                               underline=self.underline,
+                               special=self.special)
 
 
-def irc_format(text):
-    text = xhtml_escape(text)
-    result = ''
+def _is_join(line):
+    """Returns True if the line is a join"""
+    return JOIN_REGEX.search(line) is not None
+
+
+def _is_part(line):
+    """Returns True if the line was a part"""
+    return PART_REGEX.search(line) is not None
+
+
+def _is_quit(line):
+    """Returns True if the line was a quit"""
+    return QUIT_REGEX.search(line) is not None
+
+
+def process_irc_line(line):
+    """
+    Input is a line from an IRC log, where each line is like:
+        "[00:01:22] <panda> I eat shoots and leaves\n"
+    or something like:
+        "[01:11:31] *** ChanServ sets mode: +v panda"
+
+    Output is a dictionary with the following key values:
+        'timestamp': the "[00:01:22]" part from the line
+        'nick': the "<panda>" part of the line, or None
+        'fragments': a list of LineFragment's
+    """
+    line = xhtml_escape(line)
+    (timestamp, line) = line.split(" ", 1)
+
+    nick = None
+    temp_nick_split = line.split(" ", 1)
+    if ((temp_nick_split[0].startswith("&lt;") and
+         temp_nick_split[0].endswith("&gt;"))):
+        (nick, line) = temp_nick_split
+
+    # joins/parts/quit lines don't have control characters, so they shouldn't
+    # require special handling
+    line_state = LineState()
+    if _is_join(line):
+        line_state.special = "join"
+    elif _is_part(line):
+        line_state.special = "part"
+    elif _is_quit(line):
+        line_state.special = "quit"
 
     # split text into fragments that are either plain text
     # or a control code sequence
-    text = CTRL_REGEX.sub("\n\g<0>\n", text)
-    fragments = text.split("\n")
+    line = CTRL_REGEX.sub("\n\g<0>\n", line)
+    raw_fragments = line.split("\n")
+    # add a CTRL_RESET to ensure that the last text fragment is added to the results
+    raw_fragments.append(CTRL_RESET)
 
-    line_state = LineState()
-    is_inside_span = False
-    for fragment in fragments:
-        if not fragment:
-            # for blank fragments
+    fragments = list()
+    previous_state = line_state.freeze()
+    previous_text = None
+    for raw_fragment in raw_fragments:
+        if not raw_fragment:
+            # blank fragments
             continue
-
-        first_char = fragment[0]
+        first_char = raw_fragment[0]
 
         was_control_code = True
         if first_char == CTRL_COLOR:
@@ -96,18 +142,12 @@ def irc_format(text):
             was_control_code = False
 
         if was_control_code:
-            to_concat = ''
-            if is_inside_span:
-                to_concat = "</span>"
-
-            span = generate_span(line_state)
-            to_concat = "%s%s" % (to_concat, span)
-            is_inside_span = True
+            fragments.append(LineFragment(state=previous_state,
+                                          text=previous_text))
+            previous_state = line_state.freeze() # freeze the new state
+            previous_text = None
         else:
-            to_concat = fragment
-
-        result = "%s%s" % (result, to_concat)
-    if is_inside_span:
-        result = "%s</span>" % result
-    result = '<span class="irc-line">{0}</span>'.format(result)
-    return result
+            previous_text = raw_fragment
+    return IrcLine(timestamp=timestamp,
+                   nick=nick,
+                   fragments=fragments)
