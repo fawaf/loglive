@@ -1,5 +1,6 @@
 from datetime import datetime as dt
 from tornado.web import RequestHandler, URLSpec
+from loglive.formatters import process_irc_line
 from loglive.lib import user_can_access_channel
 from loglive.models import IrcNetwork
 
@@ -89,7 +90,7 @@ class LogDetailHandler(LogLiveRequestHandler):
 
         log = channel.get_log(date)
         with open(log.path, "r") as f:
-            lines = [line for line in f]
+            lines = [process_irc_line(line) for line in f]
         ret = {'date': date_string,
                'channel': channel_name,
                'network': network_name,

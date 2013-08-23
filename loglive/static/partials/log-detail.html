@@ -2,6 +2,14 @@
 
 <h1>{{log.network}} / {{log.channel}} / {{log.date}}</h1>
 
-<span ng-repeat="line in log.lines">
-    {{line}}<br />
-</span>
+<div id="irc-lines">
+    <span class="irc-line" ng-repeat="line in log.lines" ng-class="lineClasses(line)">
+        <span class="irc-timestamp"><a href="#">[{{line.timestamp}}]</a></span>
+        <span class="irc-nick" ng-if="line.nick">&lt;{{line.nick}}&gt;</span>
+        <span class="irc-message">
+            <span class="irc-fragment" ng-repeat="fragment in line.message" ng-class="fragmentStateClasses(fragment.state)">
+                {{b64Decode(fragment.text)}}
+            </span>
+    </span>
+    </span>
+</div>

@@ -44,4 +44,37 @@ function LogDetailCtrl($scope, $routeParams, Network, Channel, Log){
     $scope.log = Log.get({networkName: $routeParams.networkName,
                           channelName: $routeParams.channelName,
                           dateString: $routeParams.dateString});
+
+    $scope.lineClasses = function(line){
+        var classes = ['irc-line'];
+        if(line.type != 'message'){
+            classes.push('irc-line-' + line.type);
+        }
+        return classes;
+    };
+
+    $scope.fragmentStateClasses = function(state){
+        var classes = [];
+        if(state.bold == true){
+            classes.push("irc-bold");
+        }
+        if(state.underline == true){
+            classes.push("irc-underline");
+        }
+        if(state.fg_color != null){
+            classes.push("irc-fg-" + state.fg_color);
+        }
+        if(state.bg_color != null){
+            classes.push("irc-bg-" + state.bg_color);
+        }
+        return classes;
+    };
+
+    $scope.b64Decode = function(input){
+        if(input == null){
+            return '';
+        }
+        var result = B64.decode(input);
+        return result;
+    };
 }
