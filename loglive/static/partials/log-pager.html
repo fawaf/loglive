@@ -1,0 +1,4 @@
+<ul class="pager">
+    <li class="previous" ng-if="log.previous_log != null"><a href="#/networks/{{log.network | encodeUriComponent}}/{{log.channel | encodeUriComponent}}/{{log.previous_log | encodeUriComponent}}">&larr; {{log.previous_log}}</a></li>
+    <li class="next" ng-if="log.next_log != null"><a href="#/networks/{{log.network | encodeUriComponent}}/{{log.channel | encodeUriComponent}}/{{log.next_log | encodeUriComponent}}">{{log.next_log}} &rarr;</a></li>
+</ul>

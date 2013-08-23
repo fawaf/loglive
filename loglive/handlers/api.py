@@ -91,9 +91,21 @@ class LogDetailHandler(LogLiveRequestHandler):
         log = channel.get_log(date)
         with open(log.path, "r") as f:
             lines = [process_irc_line(line) for line in f]
+
+        if log.previous_log:
+            previous_log_date = log.previous_log.date.strftime("%Y-%m-%d")
+        else:
+            previous_log_date = None
+        if log.next_log:
+            next_log_date = log.next_log.date.strftime("%Y-%m-%d")
+        else:
+            next_log_date = None
+
         ret = {'date': date_string,
                'channel': channel_name,
                'network': network_name,
+               'previous_log': previous_log_date,
+               'next_log': next_log_date,
                'lines': lines}
         self.write(ret)
 

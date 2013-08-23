@@ -113,7 +113,11 @@ class IrcChannel(object):
             logs.append(IrcLog(self,
                                log_meta.date,
                                path))
-        return sorted(logs, key=lambda log: log.date, reverse=True)
+        logs = sorted(logs, key=lambda log: log.date, reverse=True)
+        for i in xrange(0, len(logs) - 1):
+            logs[i].previous_log = logs[i+1]
+            logs[i+1].next_log = logs[i]
+        return logs
 
     def get_log(self, date):
         """
@@ -143,6 +147,10 @@ class IrcLog(object):
         self.channel = channel
         self.date = date
         self.path = path
+
+        # these are set by the IrcChannel
+        self.previous_log = None
+        self.next_log = None
 
     def __str__(self):
         return self.path

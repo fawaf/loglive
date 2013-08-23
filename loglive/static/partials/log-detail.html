@@ -2,6 +2,7 @@
 
 <h1>{{log.network}} / {{log.channel}} / {{log.date}}</h1>
 
+<ng-include src="'/static/partials/log-pager.html'"></ng-include>
 <div id="irc-lines">
     <span class="irc-line" ng-repeat="line in log.lines" ng-class="lineClasses(line)">
         <span class="irc-timestamp"><a href="#">[{{line.timestamp}}]</a></span>
@@ -13,3 +14,4 @@
     </span>
     </span>
 </div>
+<ng-include src="'/static/partials/log-pager.html'"></ng-include>
